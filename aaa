@@ -76,7 +76,12 @@ function Library:CreateWindow(title)
 	G2L["5"]["Text"] = title or "proxy.win"
 	
 	local dragging, dragInput, dragStart, startPos
-	G2L["2"].InputBegan:Connect(function(input)
+	local dragZone = Instance.new("Frame", G2L["2"])
+	dragZone.BackgroundTransparency = 1
+	dragZone.Size = UDim2.new(1, 0, 0, 32)
+	dragZone.Position = UDim2.new(0, 0, 0, 0)
+	
+	dragZone.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = true
 			dragStart = input.Position
@@ -135,6 +140,18 @@ function Library:CreateWindow(title)
 		decoration["Position"] = UDim2.new(0.08889, 0, 0.23333, 0)
 		decoration["BorderSizePixel"] = 0
 		
+		tabButton.MouseEnter:Connect(function()
+			if window.CurrentTab ~= tab then
+				TweenService:Create(tabButton, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(20, 21, 26)}):Play()
+			end
+		end)
+		
+		tabButton.MouseLeave:Connect(function()
+			if window.CurrentTab ~= tab then
+				TweenService:Create(tabButton, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(16, 17, 21)}):Play()
+			end
+		end)
+		
 		local container = Instance.new("ScrollingFrame", G2L["10"])
 		container["Active"] = true
 		container["BackgroundTransparency"] = 1
@@ -159,6 +176,7 @@ function Library:CreateWindow(title)
 			end
 			container.Visible = true
 			TweenService:Create(decoration, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(200, 120, 255)}):Play()
+			window.CurrentTab = tab
 		end)
 		
 		if not window.CurrentTab then
@@ -177,7 +195,11 @@ function Library:CreateWindow(title)
 			btn.Size = UDim2.new(0, 340, 0, 55)
 			btn.Text = ""
 			btn.BorderSizePixel = 0
-			Instance.new("UIStroke", btn).Color = Color3.fromRGB(30, 30, 37)
+			
+			local btnStroke = Instance.new("UIStroke", btn)
+			btnStroke.Color = Color3.fromRGB(30, 30, 37)
+			btnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			
 			Instance.new("UICorner", btn)
 			
 			local icon = Instance.new("ImageLabel", btn)
@@ -229,7 +251,11 @@ function Library:CreateWindow(title)
 			btn.Size = UDim2.new(0, 340, 0, 55)
 			btn.Text = ""
 			btn.BorderSizePixel = 0
-			Instance.new("UIStroke", btn).Color = Color3.fromRGB(30, 30, 37)
+			
+			local toggleStroke = Instance.new("UIStroke", btn)
+			toggleStroke.Color = Color3.fromRGB(30, 30, 37)
+			toggleStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			
 			Instance.new("UICorner", btn)
 			
 			local lbl = Instance.new("TextLabel", btn)
@@ -289,7 +315,11 @@ function Library:CreateWindow(title)
 			frame.BackgroundColor3 = Color3.fromRGB(16, 17, 21)
 			frame.Size = UDim2.new(0, 340, 0, 65)
 			frame.BorderSizePixel = 0
-			Instance.new("UIStroke", frame).Color = Color3.fromRGB(30, 30, 37)
+			
+			local sliderStroke = Instance.new("UIStroke", frame)
+			sliderStroke.Color = Color3.fromRGB(30, 30, 37)
+			sliderStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			
 			Instance.new("UICorner", frame)
 			
 			local lbl = Instance.new("TextLabel", frame)
@@ -298,7 +328,7 @@ function Library:CreateWindow(title)
 			lbl.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 			lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
 			lbl.BackgroundTransparency = 1
-			lbl.Size = UDim2.new(0, 200, 0, 25)
+			lbl.Size = UDim2.new(0, 250, 0, 25)
 			lbl.Text = opts.Name or "Slider"
 			lbl.Position = UDim2.new(0.047, 0, 0.05, 0)
 			lbl.BorderSizePixel = 0
@@ -309,9 +339,9 @@ function Library:CreateWindow(title)
 			valLbl.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 			valLbl.TextColor3 = Color3.fromRGB(200, 120, 255)
 			valLbl.BackgroundTransparency = 1
-			valLbl.Size = UDim2.new(0, 100, 0, 25)
+			valLbl.Size = UDim2.new(0, 60, 0, 25)
 			valLbl.Text = tostring(val)
-			valLbl.Position = UDim2.new(0.7, 0, 0.05, 0)
+			valLbl.Position = UDim2.new(0, 264, 0, 3)
 			valLbl.BorderSizePixel = 0
 			
 			local sBack = Instance.new("Frame", frame)
@@ -329,7 +359,14 @@ function Library:CreateWindow(title)
 			
 			local dragging = false
 			sBack.InputBegan:Connect(function(i)
-				if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end
+				if i.UserInputType == Enum.UserInputType.MouseButton1 then
+					dragging = true
+					local pos = math.clamp((i.Position.X - sBack.AbsolutePosition.X) / sBack.AbsoluteSize.X, 0, 1)
+					val = math.floor(min + (max - min) * pos)
+					valLbl.Text = tostring(val)
+					sFill.Size = UDim2.new(pos, 0, 1, 0)
+					if opts.Callback then opts.Callback(val) end
+				end
 			end)
 			sBack.InputEnded:Connect(function(i)
 				if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
@@ -359,7 +396,12 @@ function Library:CreateWindow(title)
 			btn.Size = UDim2.new(0, 340, 0, 55)
 			btn.Text = ""
 			btn.BorderSizePixel = 0
-			Instance.new("UIStroke", btn).Color = Color3.fromRGB(30, 30, 37)
+			btn.ClipsDescendants = false
+			
+			local dropStroke = Instance.new("UIStroke", btn)
+			dropStroke.Color = Color3.fromRGB(30, 30, 37)
+			dropStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			
 			Instance.new("UICorner", btn)
 			
 			local lbl = Instance.new("TextLabel", btn)
@@ -379,10 +421,20 @@ function Library:CreateWindow(title)
 			selLbl.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 			selLbl.TextColor3 = Color3.fromRGB(200, 120, 255)
 			selLbl.BackgroundTransparency = 1
-			selLbl.Size = UDim2.new(0, 140, 0, 50)
+			selLbl.Size = UDim2.new(0, 110, 0, 50)
 			selLbl.Text = selected
-			selLbl.Position = UDim2.new(0.55, 0, 0, 0)
+			selLbl.Position = UDim2.new(0, 180, 0, 0)
 			selLbl.BorderSizePixel = 0
+			
+			local arrow = Instance.new("TextLabel", btn)
+			arrow.TextSize = 16
+			arrow.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+			arrow.TextColor3 = Color3.fromRGB(200, 120, 255)
+			arrow.BackgroundTransparency = 1
+			arrow.Size = UDim2.new(0, 20, 0, 50)
+			arrow.Text = "▼"
+			arrow.Position = UDim2.new(0, 305, 0, 0)
+			arrow.BorderSizePixel = 0
 			
 			local dList = Instance.new("Frame", btn)
 			dList.BackgroundColor3 = Color3.fromRGB(16, 17, 21)
@@ -391,7 +443,12 @@ function Library:CreateWindow(title)
 			dList.Visible = false
 			dList.ZIndex = 10
 			dList.BorderSizePixel = 0
-			Instance.new("UIStroke", dList).Color = Color3.fromRGB(30, 30, 37)
+			dList.ClipsDescendants = true
+			
+			local dListStroke = Instance.new("UIStroke", dList)
+			dListStroke.Color = Color3.fromRGB(30, 30, 37)
+			dListStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			
 			Instance.new("UICorner", dList)
 			
 			local listLayout = Instance.new("UIListLayout", dList)
@@ -415,7 +472,9 @@ function Library:CreateWindow(title)
 					selLbl.Text = selected
 					open = false
 					dList.Visible = false
+					arrow.Text = "▼"
 					TweenService:Create(btn, TweenInfo.new(0.2), {Size = UDim2.new(0, 340, 0, 55)}):Play()
+					TweenService:Create(dList, TweenInfo.new(0.2), {Size = UDim2.new(0, 340, 0, 0)}):Play()
 					if opts.Callback then opts.Callback(selected) end
 				end)
 			end
@@ -424,11 +483,14 @@ function Library:CreateWindow(title)
 				open = not open
 				dList.Visible = open
 				if open then
+					arrow.Text = "▲"
 					local h = #opts.Options * 33 + 10
-					dList.Size = UDim2.new(0, 340, 0, h)
+					TweenService:Create(dList, TweenInfo.new(0.2), {Size = UDim2.new(0, 340, 0, h)}):Play()
 					TweenService:Create(btn, TweenInfo.new(0.2), {Size = UDim2.new(0, 340, 0, 55 + h + 5)}):Play()
 				else
+					arrow.Text = "▼"
 					TweenService:Create(btn, TweenInfo.new(0.2), {Size = UDim2.new(0, 340, 0, 55)}):Play()
+					TweenService:Create(dList, TweenInfo.new(0.2), {Size = UDim2.new(0, 340, 0, 0)}):Play()
 				end
 			end)
 			
