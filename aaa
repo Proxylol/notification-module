@@ -426,15 +426,16 @@ function Library:CreateWindow(title)
 	selLbl.Position = UDim2.new(0, 180, 0, 0)
 	selLbl.BorderSizePixel = 0
 	
-	-- Arrow icon matching button style
+	-- Arrow icon matching button icon style (gray)
 	local arrow = Instance.new("ImageLabel", btn)
 	arrow.BackgroundTransparency = 1
 	arrow.ImageColor3 = Color3.fromRGB(30, 30, 37)
 	arrow.Image = "rbxassetid://10709767827"
-	arrow.Size = UDim2.new(0, 20, 0, 20)
-	arrow.Position = UDim2.new(0.897, 0, 0.32, 0)
+	arrow.Size = UDim2.new(0, 25, 0, 25)
+	arrow.Position = UDim2.new(0.897, 0, 0.273, 0)
 	arrow.BorderSizePixel = 0
 	
+	-- Dropdown list container
 	local dList = Instance.new("Frame", btn)
 	dList.BackgroundColor3 = Color3.fromRGB(16, 17, 21)
 	dList.Size = UDim2.new(0, 340, 0, 0)
@@ -457,7 +458,9 @@ function Library:CreateWindow(title)
 	listPadding.PaddingTop = UDim.new(0, 8)
 	listPadding.PaddingLeft = UDim.new(0, 8)
 	listPadding.PaddingRight = UDim.new(0, 8)
+	listPadding.PaddingBottom = UDim.new(0, 8)
 	
+	-- Create option buttons
 	for _, option in ipairs(opts.Options) do
 		local oBtn = Instance.new("TextButton", dList)
 		oBtn.BackgroundColor3 = Color3.fromRGB(16, 17, 21)
@@ -515,7 +518,6 @@ function Library:CreateWindow(title)
 		container.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
 	end)
 end
-	
 	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 		container.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
 	end)
