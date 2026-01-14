@@ -386,8 +386,8 @@ function Library:CreateWindow(title)
 				container.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
 			end)
 		end
-		
-		function tab:AddDropdown(opts)
+    
+        function tab:AddDropdown(opts)
 	local selected = opts.Default or opts.Options[1]
 	local open = false
 	
@@ -426,13 +426,13 @@ function Library:CreateWindow(title)
 	selLbl.Position = UDim2.new(0, 180, 0, 0)
 	selLbl.BorderSizePixel = 0
 	
-	-- Changed from TextLabel to ImageLabel
+	-- Arrow icon matching button style
 	local arrow = Instance.new("ImageLabel", btn)
 	arrow.BackgroundTransparency = 1
-	arrow.ImageColor3 = Color3.fromRGB(200, 120, 255)
-	arrow.Image = "rbxassetid://10709767827" -- Arrow down
-	arrow.Size = UDim2.new(0, 16, 0, 16)
-	arrow.Position = UDim2.new(0, 308, 0, 19)
+	arrow.ImageColor3 = Color3.fromRGB(30, 30, 37)
+	arrow.Image = "rbxassetid://10709767827"
+	arrow.Size = UDim2.new(0, 20, 0, 20)
+	arrow.Position = UDim2.new(0.897, 0, 0.32, 0)
 	arrow.BorderSizePixel = 0
 	
 	local dList = Instance.new("Frame", btn)
@@ -442,7 +442,7 @@ function Library:CreateWindow(title)
 	dList.Visible = false
 	dList.ZIndex = 10
 	dList.BorderSizePixel = 0
-	dList.ClipsDescendants = true
+	dList.ClipsDescendants = false
 	
 	local dListStroke = Instance.new("UIStroke", dList)
 	dListStroke.Color = Color3.fromRGB(30, 30, 37)
@@ -451,30 +451,44 @@ function Library:CreateWindow(title)
 	Instance.new("UICorner", dList)
 	
 	local listLayout = Instance.new("UIListLayout", dList)
-	listLayout.Padding = UDim.new(0, 3)
+	listLayout.Padding = UDim.new(0, 5)
 	
 	local listPadding = Instance.new("UIPadding", dList)
-	listPadding.PaddingTop = UDim.new(0, 5)
+	listPadding.PaddingTop = UDim.new(0, 8)
 	listPadding.PaddingLeft = UDim.new(0, 8)
+	listPadding.PaddingRight = UDim.new(0, 8)
 	
 	for _, option in ipairs(opts.Options) do
 		local oBtn = Instance.new("TextButton", dList)
-		oBtn.BackgroundColor3 = Color3.fromRGB(20, 21, 26)
-		oBtn.Size = UDim2.new(0.95, 0, 0, 30)
+		oBtn.BackgroundColor3 = Color3.fromRGB(16, 17, 21)
+		oBtn.Size = UDim2.new(1, -16, 0, 35)
 		oBtn.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 		oBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-		oBtn.Text = option
-		oBtn.TextSize = 12
+		oBtn.TextXAlignment = Enum.TextXAlignment.Left
+		oBtn.Text = "  " .. option
+		oBtn.TextSize = 13
 		oBtn.ZIndex = 11
 		oBtn.BorderSizePixel = 0
-		Instance.new("UICorner", oBtn).CornerRadius = UDim.new(0, 4)
+		
+		local oBtnStroke = Instance.new("UIStroke", oBtn)
+		oBtnStroke.Color = Color3.fromRGB(30, 30, 37)
+		oBtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		
+		Instance.new("UICorner", oBtn)
+		
+		oBtn.MouseEnter:Connect(function()
+			TweenService:Create(oBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(20, 21, 26)}):Play()
+		end)
+		
+		oBtn.MouseLeave:Connect(function()
+			TweenService:Create(oBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(16, 17, 21)}):Play()
+		end)
 		
 		oBtn.MouseButton1Click:Connect(function()
 			selected = option
 			selLbl.Text = selected
 			open = false
-			arrow.Image = "rbxassetid://10709767827" -- Arrow down
-			TweenService:Create(btn, TweenInfo.new(0.2), {Size = UDim2.new(0, 340, 0, 55)}):Play()
+			arrow.Image = "rbxassetid://10709767827"
 			TweenService:Create(dList, TweenInfo.new(0.2), {Size = UDim2.new(0, 340, 0, 0)}):Play()
 			task.wait(0.2)
 			dList.Visible = false
@@ -486,18 +500,21 @@ function Library:CreateWindow(title)
 		open = not open
 		if open then
 			dList.Visible = true
-			arrow.Image = "rbxassetid://10709768939" -- Arrow up
-			local h = #opts.Options * 33 + 10
+			arrow.Image = "rbxassetid://10709768939"
+			local h = (#opts.Options * 40) + 16
 			TweenService:Create(dList, TweenInfo.new(0.2), {Size = UDim2.new(0, 340, 0, h)}):Play()
-			TweenService:Create(btn, TweenInfo.new(0.2), {Size = UDim2.new(0, 340, 0, 55 + h + 5)}):Play()
 		else
-			arrow.Image = "rbxassetid://10709767827" -- Arrow down
-			TweenService:Create(btn, TweenInfo.new(0.2), {Size = UDim2.new(0, 340, 0, 55)}):Play()
+			arrow.Image = "rbxassetid://10709767827"
 			TweenService:Create(dList, TweenInfo.new(0.2), {Size = UDim2.new(0, 340, 0, 0)}):Play()
 			task.wait(0.2)
 			dList.Visible = false
 		end
 	end)
+	
+	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		container.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
+	end)
+end
 	
 	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 		container.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
